@@ -8,7 +8,7 @@ let score;
 let scoreDiv;
 let startImg;
 let deadImg;
-
+let renderedGameOver
 let playerFront;
 let playerBack;
 let playerLeft;
@@ -62,14 +62,11 @@ function setup() {
 
     player = new Player(2, windowWidth/2, windowHeight/2)
     gameState = 'start'; 
-
-    startDiv = createDiv('Welcome to Boxhead 2');
-    endDiv = createDiv('Game Over');
-    scoreDiv = createDiv(`score:${score}`);
-    startImg = createImg('Assets/startImage2.png');
-    startButton = createButton('Start Game!');
-    deadImg = createImg('Assets/playerDead.png');
-    endButton = createButton('Restart?');
+    renderStartDone = false;
+    renderedGameOver = false
+    
+   
+    
 }
 
 class Player {
@@ -101,7 +98,7 @@ class Zombie {
         this.posY=posY
         this.speed=speed
         this.radius=radius
-        
+        this.speed = speed
         if (direction===0) {  // left
             this.img=zombieRight;
             this.velocityX = speed;
@@ -191,12 +188,20 @@ function windowResized() {
 
 
 function renderImagesStart() {
-
     image(startBackground, 0, 0, windowWidth, windowHeight);
+
+    if (renderStartDone) {
+        return 
+    }
+
+    startDiv = createDiv('Welcome to Boxhead 2');
+    startImg = createImg('Assets/startImage2.png');
+    startButton = createButton('Start Game!');
     startImg.position(windowWidth/2-120, windowHeight/2-60);
     startDiv.position(windowWidth/2 - 550, windowHeight/2 - 200);
     startButton.position(windowWidth/2 - 150, windowHeight/2 + 100);
     startButton.mousePressed(toPlay);
+    renderStartDone = true;
 }
 
 function renderImages() {
@@ -204,7 +209,6 @@ function renderImages() {
     image(backgroundImg,0,0, windowWidth, windowHeight);
     image(player.img,player.posX,player.posY, 33, 48);
 
-    scoreDiv.position = (windowWidth/2, windowHeight/2);
     
     for (const item of zombies) { 
         image(item.img, item.posX, item.posY, 35, 45);
@@ -212,14 +216,33 @@ function renderImages() {
 }
 
 function toPlay() {
+    renderImagesStart = false;
+    renderedGameOver = false;
+
     removeElements();
+
     gameState = 'play';
     console.log('toplay');
+    scoreDiv = createDiv(`score: ${score}`) 
+    scoreDiv.position(windowWidth/2, windowHeight/2);
+
+    score = 0
 }
 
 function gameOver() {
 
     image(startBackground, 0, 0, windowWidth, windowHeight);
+
+    if (renderedGameOver) {
+        return 
+    }
+
+    removeElements();
+
+    deadImg = createImg('Assets/playerDead.png');
+    endButton = createButton('Restart?');
+    endDiv = createDiv('Game Over');
+    
     endDiv.position(windowWidth/2 - 300, windowHeight/2 - 200);
     deadImg.position(windowWidth/2-120, windowHeight/2-60);
     endButton.position(windowWidth/2 - 150, windowHeight/2 + 100);
@@ -228,6 +251,7 @@ function gameOver() {
     zombies = [];
     projectiles = [];
     player = new Player(2, windowWidth/2, windowHeight/2);
+    renderedGameOver = true;
 }
 
 function keyDown() {
@@ -358,7 +382,6 @@ function draw() {
             }
         }
         projectiles = projectileTemp2;
-        console.log(projectiles);
 
         if (zombies.length<10 && Date.now()-timeLastSpawned>timeBetweenSpawns) {
             timeLastSpawned=Date.now();
@@ -373,16 +396,14 @@ function draw() {
         for (const zombie of zombies) {
             projectilesTemp=[];
             let dead = false;
-            score=0;
 
             for (const projectile of projectiles) {
                 if (collision(zombie, projectile)) {
                     dead = true;
                     score+=1
-
+                    scoreDiv.elt.innerText = `score: ${score}`
                 } else {  
                     projectilesTemp.push(projectile);
-                    console.log(projectilesTemp)
                 }
             }
             projectiles = projectilesTemp;
@@ -406,8 +427,3 @@ function draw() {
         gameOver();
     }
 }
-
-
-
-
-
