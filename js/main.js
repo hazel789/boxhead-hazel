@@ -64,9 +64,7 @@ function setup() {
     gameState = 'start'; 
     renderStartDone = false;
     renderedGameOver = false
-    
-   
-    
+
 }
 
 class Player {
@@ -98,26 +96,27 @@ class Zombie {
         this.posY=posY
         this.speed=speed
         this.radius=radius
-        this.speed = speed
+        this.speed = speed + score;
+
         if (direction===0) {  // left
             this.img=zombieRight;
-            this.velocityX = speed;
+            this.velocityX = this.speed;
             this.velocityY = 0;
 
         } else if (direction===1) { //right
             this.img=zombieLeft;
-            this.velocityX = -speed;
+            this.velocityX = -this.speed;
             this.velocityY = 0;
 
         } else if (direction===2) { //down
             this.img=zombieFront;
             this.velocityX = 0;
-            this.velocityY = speed;
+            this.velocityY = this.speed;
 
         } else if (direction===3) { //up
             this.img=zombieBack;
             this.velocityX = 0;
-            this.velocityY = -speed;
+            this.velocityY = -this.speed;
         }
     }  
     move() {
@@ -125,7 +124,7 @@ class Zombie {
         this.posY += this.velocityY;
     }
 
-    changeDirection(direction, speed=1) {
+    changeDirection(direction, speed=this.speed) {
     if (direction===0) {  // left
         this.img=zombieLeft;
         this.velocityX = -speed;
@@ -223,10 +222,11 @@ function toPlay() {
 
     gameState = 'play';
     console.log('toplay');
-    scoreDiv = createDiv(`score: ${score}`) 
-    scoreDiv.position(windowWidth/2, windowHeight/2);
 
-    score = 0
+    score=0;
+    scoreDiv = createDiv(`score: ${score}`);
+    scoreDiv.addClass('scoreDiv')
+    scoreDiv.position(windowWidth-200, 50);
 }
 
 function gameOver() {
@@ -383,7 +383,7 @@ function draw() {
         }
         projectiles = projectileTemp2;
 
-        if (zombies.length<10 && Date.now()-timeLastSpawned>timeBetweenSpawns) {
+        if (zombies.length < 20 && Date.now()-timeLastSpawned>timeBetweenSpawns) {
             timeLastSpawned=Date.now();
             zombies.push(new Zombie(zombieDir[0], 0, Math.floor(Math.random()*(windowHeight-200))+100, 1));
             zombies.push(new Zombie(zombieDir[1], windowWidth, Math.floor(Math.random()*(windowHeight-200))+100, 1));
